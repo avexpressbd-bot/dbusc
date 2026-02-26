@@ -32,7 +32,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-type Tab = "dashboard" | "news" | "committee" | "settings";
+type Tab = "dashboard" | "news" | "committee" | "members" | "settings";
 
 export default function Admin() {
   const [user, setUser] = useState<any>(null);
@@ -45,6 +45,7 @@ export default function Admin() {
   // Data states
   const [news, setNews] = useState<any[]>([]);
   const [committee, setCommittee] = useState<any[]>([]);
+  const [members, setMembers] = useState<any[]>([]);
   const [siteSettings, setSiteSettings] = useState<any>(null);
 
   // Form states
@@ -122,6 +123,10 @@ export default function Admin() {
       // Fetch Committee
       const committeeSnap = await getDocs(query(collection(db, "committee"), orderBy("orderIndex", "asc")));
       setCommittee(committeeSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+
+      // Fetch Members
+      const membersSnap = await getDocs(collection(db, "members"));
+      setMembers(membersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
 
       // Fetch Site Settings
       const settingsSnap = await getDoc(doc(db, "settings", "site"));
@@ -256,6 +261,44 @@ export default function Admin() {
     }
   };
 
+  const handleDeleteMember = async (id: string) => {
+    if (!confirm("আপনি কি নিশ্চিতভাবে এই মেম্বারকে ডিলিট করতে চান?")) return;
+    try {
+      await deleteDoc(doc(db, "members", id));
+      setMessage({ type: "success", text: "মেম্বার ডিলিট করা হয়েছে" });
+      fetchData();
+    } catch (err) {
+      setMessage({ type: "error", text: "ডিলিট করতে সমস্যা হয়েছে" });
+    }
+  };
+
+  const handleUpdateMember = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    const form = e.target as HTMLFormElement;
+    const formData = new FormData(form);
+    
+    try {
+      const data = {
+        name: formData.get("name"),
+        phone: formData.get("phone"),
+        address: formData.get("address"),
+        role: formData.get("role")
+      };
+
+      await updateDoc(doc(db, "members", editingItem.id), data);
+      setMessage({ type: "success", text: "মেম্বার তথ্য আপডেট করা হয়েছে!" });
+      setEditingItem(null);
+      setIsEditing(false);
+      fetchData();
+    } catch (err) {
+      console.error("Error updating member:", err);
+      setMessage({ type: "error", text: "আপডেট করতে সমস্যা হয়েছে" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleUpdateNews = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -371,6 +414,13 @@ export default function Admin() {
             কমিটি ম্যানেজমেন্ট
           </button>
           <button 
+            onClick={() => setActiveTab("members")}
+            className={`w-full flex items-center px-4 py-3 rounded-xl transition-all ${activeTab === "members" ? "bg-emerald-800 text-amber-400" : "hover:bg-emerald-900/50 text-emerald-100"}`}
+          >
+            <Users className="w-5 h-5 mr-3" />
+            মেম্বার লিস্ট
+          </button>
+          <button 
             onClick={() => setActiveTab("settings")}
             className={`w-full flex items-center px-4 py-3 rounded-xl transition-all ${activeTab === "settings" ? "bg-emerald-800 text-amber-400" : "hover:bg-emerald-900/50 text-emerald-100"}`}
           >
@@ -419,7 +469,7 @@ export default function Admin() {
         {activeTab === "dashboard" && (
           <div className="space-y-8">
             <h2 className="text-3xl font-bold text-emerald-900">ড্যাশবোর্ড ওভারভিউ</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
               <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-emerald-100">
                 <div className="text-emerald-400 mb-4"><Newspaper className="w-10 h-10" /></div>
                 <div className="text-3xl font-bold text-emerald-900">{news.length}</div>
@@ -429,6 +479,11 @@ export default function Admin() {
                 <div className="text-emerald-400 mb-4"><Users className="w-10 h-10" /></div>
                 <div className="text-3xl font-bold text-emerald-900">{committee.length}</div>
                 <div className="text-sm text-emerald-600 uppercase tracking-widest font-bold mt-1">কমিটি সদস্য</div>
+              </div>
+              <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-emerald-100">
+                <div className="text-emerald-400 mb-4"><Users className="w-10 h-10" /></div>
+                <div className="text-3xl font-bold text-emerald-900">{members.length}</div>
+                <div className="text-sm text-emerald-600 uppercase tracking-widest font-bold mt-1">নিবন্ধিত সদস্য</div>
               </div>
               <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-emerald-100">
                 <div className="text-emerald-400 mb-4"><Settings className="w-10 h-10" /></div>
@@ -646,6 +701,121 @@ export default function Admin() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === "members" && (
+          <div className="space-y-8">
+            <h2 className="text-3xl font-bold text-emerald-900">মেম্বার লিস্ট</h2>
+            
+            {isEditing && (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-white p-8 rounded-[2.5rem] shadow-lg border border-emerald-100"
+              >
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-xl font-bold text-emerald-900">মেম্বার তথ্য এডিট করুন</h3>
+                  <button onClick={() => { setIsEditing(false); setEditingItem(null); }}>
+                    <X className="w-6 h-6 text-emerald-400" />
+                  </button>
+                </div>
+                <form onSubmit={handleUpdateMember} className="space-y-6">
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-xs font-bold text-emerald-900 uppercase tracking-widest mb-2">নাম</label>
+                      <input 
+                        name="name" 
+                        required 
+                        defaultValue={editingItem?.name || ""}
+                        className="w-full px-6 py-4 bg-emerald-50/50 border border-emerald-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-emerald-900 uppercase tracking-widest mb-2">ফোন</label>
+                      <input 
+                        name="phone" 
+                        required 
+                        defaultValue={editingItem?.phone || ""}
+                        className="w-full px-6 py-4 bg-emerald-50/50 border border-emerald-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500" 
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-xs font-bold text-emerald-900 uppercase tracking-widest mb-2">ঠিকানা</label>
+                      <input 
+                        name="address" 
+                        defaultValue={editingItem?.address || ""}
+                        className="w-full px-6 py-4 bg-emerald-50/50 border border-emerald-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-emerald-900 uppercase tracking-widest mb-2">রোল (Role)</label>
+                      <select 
+                        name="role"
+                        defaultValue={editingItem?.role || "member"}
+                        className="w-full px-6 py-4 bg-emerald-50/50 border border-emerald-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500"
+                      >
+                        <option value="member">সাধারণ সদস্য</option>
+                        <option value="admin">এডমিন</option>
+                      </select>
+                    </div>
+                  </div>
+                  <button type="submit" disabled={loading} className="w-full py-4 bg-emerald-900 text-white font-bold rounded-2xl hover:bg-emerald-800 transition-all">
+                    {loading ? "অপেক্ষা করুন..." : "আপডেট করুন"}
+                  </button>
+                </form>
+              </motion.div>
+            )}
+
+            <div className="bg-white rounded-[2.5rem] shadow-sm border border-emerald-100 overflow-hidden">
+              <table className="w-full text-left">
+                <thead className="bg-emerald-50 border-b border-emerald-100">
+                  <tr>
+                    <th className="px-6 py-4 text-xs font-bold text-emerald-900 uppercase tracking-widest">নাম ও ইমেইল</th>
+                    <th className="px-6 py-4 text-xs font-bold text-emerald-900 uppercase tracking-widest">ফোন</th>
+                    <th className="px-6 py-4 text-xs font-bold text-emerald-900 uppercase tracking-widest">রোল</th>
+                    <th className="px-6 py-4 text-xs font-bold text-emerald-900 uppercase tracking-widest">অ্যাকশন</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-emerald-50">
+                  {members.map(member => (
+                    <tr key={member.id} className="hover:bg-emerald-50/30 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="font-bold text-emerald-900">{member.name}</div>
+                        <div className="text-xs text-emerald-500">{member.email}</div>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-emerald-700">{member.phone}</td>
+                      <td className="px-6 py-4">
+                        <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${member.role === 'admin' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                          {member.role === 'admin' ? 'এডমিন' : 'সদস্য'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex gap-2">
+                          <button 
+                            onClick={() => {
+                              setEditingItem(member);
+                              setIsEditing(true);
+                            }}
+                            className="p-2 text-emerald-600 hover:bg-emerald-100 rounded-lg transition-colors"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteMember(member.id)}
+                            className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         )}

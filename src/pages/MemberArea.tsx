@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { User, Mail, Lock, Phone, ArrowRight, CheckCircle2, AlertCircle, LogOut, Settings, ShieldCheck } from "lucide-react";
+import { User, Mail, Lock, Phone, ArrowRight, CheckCircle2, AlertCircle, LogOut, Settings, ShieldCheck, X, Loader2 } from "lucide-react";
 import { auth, db } from "@/src/lib/firebase";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -14,7 +14,7 @@ import {
   updateProfile,
   User as FirebaseUser
 } from "firebase/auth";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
 
 const loginSchema = z.object({
   email: z.string().email("সঠিক ইমেইল দিন"),
@@ -33,6 +33,8 @@ export default function MemberArea() {
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [userData, setUserData] = useState<any>(null);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [editData, setEditData] = useState({ name: "", phone: "", address: "" });
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [dbStatus, setDbStatus] = useState<"checking" | "connected" | "error">("checking");
   const navigate = useNavigate();
@@ -147,6 +149,33 @@ export default function MemberArea() {
     setMessage({ type: "success", text: "লগআউট সফল হয়েছে" });
   };
 
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      if (!user) return;
+      await updateDoc(doc(db, "members", user.uid), editData);
+      setUserData({ ...userData, ...editData });
+      setIsEditingProfile(false);
+      setMessage({ type: "success", text: "প্রোফাইল সফলভাবে আপডেট করা হয়েছে।" });
+    } catch (err) {
+      console.error(err);
+      setMessage({ type: "error", text: "আপডেট করতে সমস্যা হয়েছে।" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (userData) {
+      setEditData({
+        name: userData.name || "",
+        phone: userData.phone || "",
+        address: userData.address || ""
+      });
+    }
+  }, [userData]);
+
   if (user) {
     return (
       <div className="min-h-screen py-20 bg-stone-50 px-4">
@@ -212,25 +241,77 @@ export default function MemberArea() {
             {/* Main Content */}
             <div className="md:col-span-2 space-y-6">
               <div className="bg-white rounded-[2.5rem] p-10 shadow-sm border border-emerald-100">
-                <h3 className="text-2xl font-bold text-emerald-900 mb-8">ব্যক্তিগত তথ্য</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                  <div>
-                    <label className="block text-xs font-bold text-emerald-400 uppercase tracking-widest mb-1">পূর্ণ নাম</label>
-                    <p className="text-lg font-medium text-emerald-900">{userData?.name || user.displayName}</p>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-emerald-400 uppercase tracking-widest mb-1">ইমেইল</label>
-                    <p className="text-lg font-medium text-emerald-900">{user.email}</p>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-emerald-400 uppercase tracking-widest mb-1">মোবাইল নম্বর</label>
-                    <p className="text-lg font-medium text-emerald-900">{userData?.phone || "সংযুক্ত নেই"}</p>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-emerald-400 uppercase tracking-widest mb-1">সদস্যপদ আইডি</label>
-                    <p className="text-lg font-medium text-emerald-900">#BUS-{user.uid.slice(0, 6).toUpperCase()}</p>
-                  </div>
+                <div className="flex justify-between items-center mb-8">
+                  <h3 className="text-2xl font-bold text-emerald-900">ব্যক্তিগত তথ্য</h3>
+                  <button 
+                    onClick={() => setIsEditingProfile(!isEditingProfile)}
+                    className="flex items-center text-sm font-bold text-emerald-600 hover:text-amber-600 transition-colors"
+                  >
+                    {isEditingProfile ? <X className="w-4 h-4 mr-1" /> : <Settings className="w-4 h-4 mr-1" />}
+                    {isEditingProfile ? "বাতিল" : "এডিট প্রোফাইল"}
+                  </button>
                 </div>
+
+                {isEditingProfile ? (
+                  <form onSubmit={handleUpdateProfile} className="space-y-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-xs font-bold text-emerald-400 uppercase tracking-widest mb-2">পূর্ণ নাম</label>
+                        <input 
+                          value={editData.name}
+                          onChange={e => setEditData({...editData, name: e.target.value})}
+                          className="w-full px-6 py-4 bg-emerald-50/50 border border-emerald-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-emerald-400 uppercase tracking-widest mb-2">মোবাইল নম্বর</label>
+                        <input 
+                          value={editData.phone}
+                          onChange={e => setEditData({...editData, phone: e.target.value})}
+                          className="w-full px-6 py-4 bg-emerald-50/50 border border-emerald-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500"
+                        />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="block text-xs font-bold text-emerald-400 uppercase tracking-widest mb-2">ঠিকানা</label>
+                        <input 
+                          value={editData.address}
+                          onChange={e => setEditData({...editData, address: e.target.value})}
+                          className="w-full px-6 py-4 bg-emerald-50/50 border border-emerald-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500"
+                        />
+                      </div>
+                    </div>
+                    <button 
+                      disabled={loading}
+                      className="px-8 py-4 bg-emerald-900 text-white font-bold rounded-2xl hover:bg-emerald-800 transition-all flex items-center disabled:opacity-50"
+                    >
+                      {loading ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <CheckCircle2 className="w-5 h-5 mr-2" />}
+                      পরিবর্তন সেভ করুন
+                    </button>
+                  </form>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                    <div>
+                      <label className="block text-xs font-bold text-emerald-400 uppercase tracking-widest mb-1">পূর্ণ নাম</label>
+                      <p className="text-lg font-medium text-emerald-900">{userData?.name || user.displayName}</p>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-emerald-400 uppercase tracking-widest mb-1">ইমেইল</label>
+                      <p className="text-lg font-medium text-emerald-900">{user.email}</p>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-emerald-400 uppercase tracking-widest mb-1">মোবাইল নম্বর</label>
+                      <p className="text-lg font-medium text-emerald-900">{userData?.phone || "সংযুক্ত নেই"}</p>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-emerald-400 uppercase tracking-widest mb-1">ঠিকানা</label>
+                      <p className="text-lg font-medium text-emerald-900">{userData?.address || "সংযুক্ত নেই"}</p>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-emerald-400 uppercase tracking-widest mb-1">সদস্যপদ আইডি</label>
+                      <p className="text-lg font-medium text-emerald-900">#BUS-{user.uid.slice(0, 6).toUpperCase()}</p>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="bg-emerald-900 rounded-[2.5rem] p-10 text-white relative overflow-hidden">
