@@ -86,18 +86,31 @@ export default function MemberArea() {
       await updateProfile(newUser, { displayName: data.name });
       
       // Save extra data to Firestore
-      await setDoc(doc(db, "members", newUser.uid), {
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        role: "member",
-        createdAt: new Date().toISOString()
-      });
+      try {
+        await setDoc(doc(db, "members", newUser.uid), {
+          name: data.name,
+          email: data.email,
+          phone: data.phone,
+          role: "member",
+          createdAt: new Date().toISOString()
+        });
+      } catch (fsErr: any) {
+        console.error("Firestore error:", fsErr);
+        // Even if Firestore fails, the user is created in Auth.
+        // We should inform them but maybe not treat it as a total failure if they can still log in.
+        // But for this app, we need the Firestore record for roles.
+        throw new Error(`ডাটাবেজ ত্রুটি: ${fsErr.message}`);
+      }
 
       setMessage({ type: "success", text: "নিবন্ধন সফল হয়েছে!" });
     } catch (err: any) {
+      console.error("Registration error:", err);
       let errorMsg = "নিবন্ধন ব্যর্থ হয়েছে";
       if (err.code === "auth/email-already-in-use") errorMsg = "এই ইমেইলটি ইতিমধ্যে ব্যবহৃত হচ্ছে";
+      else if (err.code === "auth/weak-password") errorMsg = "পাসওয়ার্ড কমপক্ষে ৬ অক্ষর হতে হবে";
+      else if (err.code === "auth/invalid-email") errorMsg = "অকার্যকর ইমেইল";
+      else if (err.message) errorMsg = err.message;
+      
       setMessage({ type: "error", text: errorMsg });
     } finally {
       setLoading(false);
