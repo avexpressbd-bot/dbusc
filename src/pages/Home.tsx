@@ -64,7 +64,7 @@ export default function Home() {
               {settings?.heroTitle || "ঐক্যবদ্ধ বিষ্ণুপুর, সমৃদ্ধ ভবিষ্যৎ"}
             </h1>
             <p className="text-lg md:text-xl text-emerald-100/90 mb-10 leading-relaxed">
-              {settings?.heroSubtitle || "ঢাকায়স্থ বিষ্ণুপুর ইউনিয়ন সোসাইটি একটি অরাজনৈতিক ও সামাজিক সংগঠন।"}
+              {settings?.heroSubtitle || `ঢাকায়স্থ ${settings?.siteName || "বিষ্ণুপুর ইউনিয়ন সোসাইটি"} একটি অরাজনৈতিক ও সামাজিক সংগঠন।`}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center sm:justify-start">
               <Link

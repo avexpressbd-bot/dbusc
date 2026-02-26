@@ -60,8 +60,13 @@ export default function Admin() {
       const snapshot = await uploadBytes(storageRef, file);
       const downloadURL = await getDownloadURL(snapshot.ref);
       return downloadURL;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Upload error:", error);
+      let errorMsg = "ফাইল আপলোড করতে সমস্যা হয়েছে।";
+      if (error.code === "storage/unauthorized") {
+        errorMsg = "ফায়ারবেস স্টোরেজ পারমিশন নেই। অনুগ্রহ করে Firebase Console-এ গিয়ে Storage Rules চেক করুন।";
+      }
+      setMessage({ type: "error", text: errorMsg });
       throw error;
     } finally {
       setUploading(false);
@@ -125,11 +130,20 @@ export default function Admin() {
       } else {
         // Default settings if none exist
         const defaultSettings = {
+          siteName: "বিষ্ণুপুর ইউনিয়ন সোসাইটি",
+          siteTagline: "ঢাকায়স্থ সামাজিক সংগঠন",
           heroTitle: "ঐক্যবদ্ধ বিষ্ণুপুর, সমৃদ্ধ ভবিষ্যৎ",
           heroSubtitle: "ঢাকায়স্থ বিষ্ণুপুর ইউনিয়ন সোসাইটি একটি অরাজনৈতিক ও সামাজিক সংগঠন। আমরা আমাদের ইউনিয়নের মানুষের কল্যাণে এবং ভ্রাতৃত্বের বন্ধন সুদৃঢ় করতে কাজ করে যাচ্ছি।",
           heroImage: "https://picsum.photos/seed/society-hero/1920/1080?blur=2",
           missionTitle: "আমাদের লক্ষ্য ও উদ্দেশ্য",
           missionDesc: "বিষ্ণুপুর ইউনিয়নের মানুষের আর্থ-সামাজিক উন্নয়ন এবং শিক্ষার প্রসারে কাজ করা আমাদের প্রধান লক্ষ্য।",
+          address: "বাড়ি নং-১২, রোড নং-৫, ধানমন্ডি, ঢাকা-১২০৫",
+          phone: "+৮৮০ ১৭০০-০০০০০০",
+          email: "info@bishnupursociety.org",
+          officeTime: "শনিবার - বৃহস্পতিবার: সকাল ১০টা - রাত ৮টা",
+          facebook: "#",
+          twitter: "#",
+          youtube: "#",
           statsMembers: "৫০০+",
           statsEvents: "২০+",
           statsProjects: "৫০+",
@@ -644,19 +658,46 @@ export default function Admin() {
                 <div className="space-y-6">
                   <h3 className="text-lg font-bold text-emerald-900 border-b pb-2">সাধারণ সেটিংস</h3>
                   <div>
-                    <label className="block text-xs font-bold text-emerald-900 uppercase tracking-widest mb-2">লোগো আপলোড</label>
+                    <label className="block text-xs font-bold text-emerald-900 uppercase tracking-widest mb-2">সাইটের নাম</label>
+                    <input 
+                      value={siteSettings.siteName || ""} 
+                      onChange={e => setSiteSettings({...siteSettings, siteName: e.target.value})}
+                      className="w-full px-6 py-4 bg-emerald-50/50 border border-emerald-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500" 
+                      placeholder="যেমন: বিষ্ণুপুর ইউনিয়ন সোসাইটি"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-emerald-900 uppercase tracking-widest mb-2">ট্যাগলাইন (Tagline)</label>
+                    <input 
+                      value={siteSettings.siteTagline || ""} 
+                      onChange={e => setSiteSettings({...siteSettings, siteTagline: e.target.value})}
+                      className="w-full px-6 py-4 bg-emerald-50/50 border border-emerald-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500" 
+                      placeholder="যেমন: ঢাকায়স্থ সামাজিক সংগঠন"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-emerald-900 uppercase tracking-widest mb-2">লোগো আপলোড {uploading && <Loader2 className="inline w-3 h-3 animate-spin ml-2" />}</label>
                     <div className="flex items-center gap-4">
                       <input 
                         type="file" 
                         accept="image/*"
+                        disabled={uploading}
                         onChange={async (e) => {
                           const file = e.target.files?.[0];
                           if (file) {
-                            const url = await handleFileUpload(file, "settings");
-                            setSiteSettings({...siteSettings, logoUrl: url});
+                            try {
+                              const url = await handleFileUpload(file, "settings");
+                              setSiteSettings({...siteSettings, logoUrl: url});
+                            } catch (err) {}
                           }
                         }}
-                        className="flex-grow px-6 py-4 bg-emerald-50/50 border border-emerald-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-900 file:text-white hover:file:bg-emerald-800" 
+                        className="flex-grow px-6 py-4 bg-emerald-50/50 border border-emerald-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-900 file:text-white hover:file:bg-emerald-800 disabled:opacity-50" 
+                      />
+                      <input 
+                        value={siteSettings.logoUrl || ""} 
+                        onChange={e => setSiteSettings({...siteSettings, logoUrl: e.target.value})}
+                        className="flex-grow px-6 py-4 bg-emerald-50/50 border border-emerald-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500" 
+                        placeholder="অথবা লোগো URL"
                       />
                       {siteSettings.logoUrl && <img src={siteSettings.logoUrl} className="w-12 h-12 object-contain" />}
                     </div>
@@ -680,19 +721,22 @@ export default function Admin() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-emerald-900 uppercase tracking-widest mb-2">হিরো ইমেজ আপলোড</label>
+                    <label className="block text-xs font-bold text-emerald-900 uppercase tracking-widest mb-2">হিরো ইমেজ আপলোড {uploading && <Loader2 className="inline w-3 h-3 animate-spin ml-2" />}</label>
                     <div className="flex items-center gap-4">
                       <input 
                         type="file" 
                         accept="image/*"
+                        disabled={uploading}
                         onChange={async (e) => {
                           const file = e.target.files?.[0];
                           if (file) {
-                            const url = await handleFileUpload(file, "settings");
-                            setSiteSettings({...siteSettings, heroImage: url});
+                            try {
+                              const url = await handleFileUpload(file, "settings");
+                              setSiteSettings({...siteSettings, heroImage: url});
+                            } catch (err) {}
                           }
                         }}
-                        className="flex-grow px-6 py-4 bg-emerald-50/50 border border-emerald-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-900 file:text-white hover:file:bg-emerald-800" 
+                        className="flex-grow px-6 py-4 bg-emerald-50/50 border border-emerald-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-900 file:text-white hover:file:bg-emerald-800 disabled:opacity-50" 
                       />
                       <input 
                         value={siteSettings.heroImage} 
@@ -704,27 +748,91 @@ export default function Admin() {
                   </div>
                 </div>
 
-                <div className="space-y-6">
-                  <h3 className="text-lg font-bold text-emerald-900 border-b pb-2">লক্ষ্য ও উদ্দেশ্য</h3>
-                  <div>
-                    <label className="block text-xs font-bold text-emerald-900 uppercase tracking-widest mb-2">টাইটেল</label>
-                    <input 
-                      value={siteSettings.missionTitle} 
-                      onChange={e => setSiteSettings({...siteSettings, missionTitle: e.target.value})}
-                      className="w-full px-6 py-4 bg-emerald-50/50 border border-emerald-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500" 
-                    />
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-bold text-emerald-900 border-b pb-2">যোগাযোগ তথ্য</h3>
+                    <div>
+                      <label className="block text-xs font-bold text-emerald-900 uppercase tracking-widest mb-2">অফিস ঠিকানা</label>
+                      <input 
+                        value={siteSettings.address} 
+                        onChange={e => setSiteSettings({...siteSettings, address: e.target.value})}
+                        className="w-full px-6 py-4 bg-emerald-50/50 border border-emerald-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500" 
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-emerald-900 uppercase tracking-widest mb-2">ফোন নম্বর</label>
+                        <input 
+                          value={siteSettings.phone} 
+                          onChange={e => setSiteSettings({...siteSettings, phone: e.target.value})}
+                          className="w-full px-6 py-4 bg-emerald-50/50 border border-emerald-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500" 
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-emerald-900 uppercase tracking-widest mb-2">ইমেইল</label>
+                        <input 
+                          value={siteSettings.email} 
+                          onChange={e => setSiteSettings({...siteSettings, email: e.target.value})}
+                          className="w-full px-6 py-4 bg-emerald-50/50 border border-emerald-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500" 
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-emerald-900 uppercase tracking-widest mb-2">অফিস সময়</label>
+                      <input 
+                        value={siteSettings.officeTime} 
+                        onChange={e => setSiteSettings({...siteSettings, officeTime: e.target.value})}
+                        className="w-full px-6 py-4 bg-emerald-50/50 border border-emerald-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500" 
+                      />
+                    </div>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-emerald-900 uppercase tracking-widest mb-2">ফেসবুক লিঙ্ক</label>
+                        <input 
+                          value={siteSettings.facebook} 
+                          onChange={e => setSiteSettings({...siteSettings, facebook: e.target.value})}
+                          className="w-full px-4 py-3 bg-emerald-50/50 border border-emerald-100 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500" 
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-emerald-900 uppercase tracking-widest mb-2">টুইটার লিঙ্ক</label>
+                        <input 
+                          value={siteSettings.twitter} 
+                          onChange={e => setSiteSettings({...siteSettings, twitter: e.target.value})}
+                          className="w-full px-4 py-3 bg-emerald-50/50 border border-emerald-100 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500" 
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-emerald-900 uppercase tracking-widest mb-2">ইউটিউব লিঙ্ক</label>
+                        <input 
+                          value={siteSettings.youtube} 
+                          onChange={e => setSiteSettings({...siteSettings, youtube: e.target.value})}
+                          className="w-full px-4 py-3 bg-emerald-50/50 border border-emerald-100 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500" 
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-xs font-bold text-emerald-900 uppercase tracking-widest mb-2">বর্ণনা</label>
-                    <textarea 
-                      value={siteSettings.missionDesc} 
-                      onChange={e => setSiteSettings({...siteSettings, missionDesc: e.target.value})}
-                      rows={3}
-                      className="w-full px-6 py-4 bg-emerald-50/50 border border-emerald-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500" 
-                    />
+
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-bold text-emerald-900 border-b pb-2">লক্ষ্য ও উদ্দেশ্য</h3>
+                    <div>
+                      <label className="block text-xs font-bold text-emerald-900 uppercase tracking-widest mb-2">টাইটেল</label>
+                      <input 
+                        value={siteSettings.missionTitle} 
+                        onChange={e => setSiteSettings({...siteSettings, missionTitle: e.target.value})}
+                        className="w-full px-6 py-4 bg-emerald-50/50 border border-emerald-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-emerald-900 uppercase tracking-widest mb-2">বর্ণনা</label>
+                      <textarea 
+                        value={siteSettings.missionDesc} 
+                        onChange={e => setSiteSettings({...siteSettings, missionDesc: e.target.value})}
+                        rows={3}
+                        className="w-full px-6 py-4 bg-emerald-50/50 border border-emerald-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500" 
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
 
               <div className="space-y-6">
                 <h3 className="text-lg font-bold text-emerald-900 border-b pb-2">পরিসংখ্যান (Stats)</h3>

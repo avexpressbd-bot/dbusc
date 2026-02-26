@@ -15,21 +15,21 @@ const navLinks = [
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [settings, setSettings] = useState<any>(null);
   const location = useLocation();
 
   useEffect(() => {
-    const fetchLogo = async () => {
+    const fetchSettings = async () => {
       try {
         const settingsSnap = await getDoc(doc(db, "settings", "site"));
         if (settingsSnap.exists()) {
-          setLogoUrl(settingsSnap.data().logoUrl);
+          setSettings(settingsSnap.data());
         }
       } catch (err) {
-        console.error("Error fetching logo:", err);
+        console.error("Error fetching settings:", err);
       }
     };
-    fetchLogo();
+    fetchSettings();
   }, []);
 
   return (
@@ -38,19 +38,19 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-20">
           <div className="flex items-center">
             <Link to="/" className="flex items-center gap-3">
-              {logoUrl ? (
-                <img src={logoUrl} alt="Logo" className="w-12 h-12 object-contain" />
+              {settings?.logoUrl ? (
+                <img src={settings.logoUrl} alt="Logo" className="w-12 h-12 object-contain" />
               ) : (
                 <div className="w-10 h-10 bg-amber-400 rounded-lg flex items-center justify-center font-bold text-emerald-900">
-                  B
+                  {settings?.siteName ? settings.siteName.charAt(0) : "B"}
                 </div>
               )}
               <div className="flex flex-col">
                 <span className="text-xl font-bold tracking-tight text-amber-400 leading-tight">
-                  বিষ্ণুপুর ইউনিয়ন সোসাইটি
+                  {settings?.siteName || "বিষ্ণুপুর ইউনিয়ন সোসাইটি"}
                 </span>
                 <span className="text-xs font-medium text-emerald-100/80">
-                  ঢাকায়স্থ সামাজিক সংগঠন
+                  {settings?.siteTagline || "ঢাকায়স্থ সামাজিক সংগঠন"}
                 </span>
               </div>
             </Link>

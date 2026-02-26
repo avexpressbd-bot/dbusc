@@ -1,7 +1,37 @@
+import { useState, useEffect } from "react";
 import { motion } from "motion/react";
-import { MapPin, Phone, Mail, Clock, Send, Facebook, Twitter, Youtube } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, Send, Facebook, Twitter, Youtube, Loader2 } from "lucide-react";
+import { db } from "@/src/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 export default function Contact() {
+  const [settings, setSettings] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const settingsSnap = await getDoc(doc(db, "settings", "site"));
+        if (settingsSnap.exists()) {
+          setSettings(settingsSnap.data());
+        }
+      } catch (err) {
+        console.error("Error fetching contact settings:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-stone-50">
+        <Loader2 className="w-12 h-12 text-emerald-900 animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="py-20 bg-stone-50 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -25,7 +55,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <h4 className="font-bold text-emerald-900 mb-1">ঠিকানা</h4>
-                    <p className="text-sm text-emerald-800/60 leading-relaxed">বাড়ি নং-১২, রোড নং-৫, ধানমন্ডি, ঢাকা-১২০৫</p>
+                    <p className="text-sm text-emerald-800/60 leading-relaxed">{settings?.address || "বাড়ি নং-১২, রোড নং-৫, ধানমন্ডি, ঢাকা-১২০৫"}</p>
                   </div>
                 </li>
                 <li className="flex items-start">
@@ -34,7 +64,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <h4 className="font-bold text-emerald-900 mb-1">ফোন</h4>
-                    <p className="text-sm text-emerald-800/60 leading-relaxed">+৮৮০ ১৭০০-০০০০০০</p>
+                    <p className="text-sm text-emerald-800/60 leading-relaxed">{settings?.phone || "+৮৮০ ১৭০০-০০০০০০"}</p>
                   </div>
                 </li>
                 <li className="flex items-start">
@@ -43,7 +73,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <h4 className="font-bold text-emerald-900 mb-1">ইমেইল</h4>
-                    <p className="text-sm text-emerald-800/60 leading-relaxed">info@bishnupursociety.org</p>
+                    <p className="text-sm text-emerald-800/60 leading-relaxed">{settings?.email || "info@bishnupursociety.org"}</p>
                   </div>
                 </li>
                 <li className="flex items-start">
@@ -52,7 +82,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <h4 className="font-bold text-emerald-900 mb-1">অফিস সময়</h4>
-                    <p className="text-sm text-emerald-800/60 leading-relaxed">শনিবার - বৃহস্পতিবার: সকাল ১০টা - রাত ৮টা</p>
+                    <p className="text-sm text-emerald-800/60 leading-relaxed">{settings?.officeTime || "শনিবার - বৃহস্পতিবার: সকাল ১০টা - রাত ৮টা"}</p>
                   </div>
                 </li>
               </ul>
@@ -61,13 +91,13 @@ export default function Contact() {
             <div className="bg-emerald-900 p-8 rounded-[2.5rem] text-white">
               <h3 className="text-xl font-bold mb-6">সোশ্যাল মিডিয়া</h3>
               <div className="flex gap-4">
-                <a href="#" className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center hover:bg-amber-400 hover:text-emerald-950 transition-all">
+                <a href={settings?.facebook || "#"} target="_blank" rel="noreferrer" className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center hover:bg-amber-400 hover:text-emerald-950 transition-all">
                   <Facebook className="w-5 h-5" />
                 </a>
-                <a href="#" className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center hover:bg-amber-400 hover:text-emerald-950 transition-all">
+                <a href={settings?.twitter || "#"} target="_blank" rel="noreferrer" className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center hover:bg-amber-400 hover:text-emerald-950 transition-all">
                   <Twitter className="w-5 h-5" />
                 </a>
-                <a href="#" className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center hover:bg-amber-400 hover:text-emerald-950 transition-all">
+                <a href={settings?.youtube || "#"} target="_blank" rel="noreferrer" className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center hover:bg-amber-400 hover:text-emerald-950 transition-all">
                   <Youtube className="w-5 h-5" />
                 </a>
               </div>

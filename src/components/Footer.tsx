@@ -1,7 +1,26 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Facebook, Twitter, Youtube, Mail, Phone, MapPin } from "lucide-react";
+import { db } from "@/src/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 export default function Footer() {
+  const [settings, setSettings] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const settingsSnap = await getDoc(doc(db, "settings", "site"));
+        if (settingsSnap.exists()) {
+          setSettings(settingsSnap.data());
+        }
+      } catch (err) {
+        console.error("Error fetching footer settings:", err);
+      }
+    };
+    fetchSettings();
+  }, []);
+
   return (
     <footer className="bg-emerald-950 text-emerald-100 pt-16 pb-8 border-t border-emerald-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -9,19 +28,19 @@ export default function Footer() {
           {/* Brand */}
           <div className="col-span-1 md:col-span-1">
             <h3 className="text-xl font-bold text-amber-400 mb-4">
-              বিষ্ণুপুর ইউনিয়ন সোসাইটি
+              {settings?.siteName || "বিষ্ণুপুর ইউনিয়ন সোসাইটি"}
             </h3>
             <p className="text-sm text-emerald-200/70 leading-relaxed">
-              ঢাকায়স্থ বিষ্ণুপুর ইউনিয়ন সোসাইটি একটি অরাজনৈতিক ও সামাজিক সংগঠন। আমরা আমাদের ইউনিয়নের মানুষের কল্যাণে কাজ করে যাচ্ছি।
+              ঢাকায়স্থ {settings?.siteName || "বিষ্ণুপুর ইউনিয়ন সোসাইটি"} একটি অরাজনৈতিক ও সামাজিক সংগঠন। আমরা আমাদের ইউনিয়নের মানুষের কল্যাণে কাজ করে যাচ্ছি।
             </p>
             <div className="flex space-x-4 mt-6">
-              <a href="#" className="text-emerald-300 hover:text-amber-400 transition-colors">
+              <a href={settings?.facebook || "#"} target="_blank" rel="noreferrer" className="text-emerald-300 hover:text-amber-400 transition-colors">
                 <Facebook className="w-5 h-5" />
               </a>
-              <a href="#" className="text-emerald-300 hover:text-amber-400 transition-colors">
+              <a href={settings?.twitter || "#"} target="_blank" rel="noreferrer" className="text-emerald-300 hover:text-amber-400 transition-colors">
                 <Twitter className="w-5 h-5" />
               </a>
-              <a href="#" className="text-emerald-300 hover:text-amber-400 transition-colors">
+              <a href={settings?.youtube || "#"} target="_blank" rel="noreferrer" className="text-emerald-300 hover:text-amber-400 transition-colors">
                 <Youtube className="w-5 h-5" />
               </a>
             </div>
@@ -55,22 +74,22 @@ export default function Footer() {
             <ul className="space-y-4 text-sm">
               <li className="flex items-start">
                 <MapPin className="w-5 h-5 text-amber-400 mr-3 shrink-0" />
-                <span>বাড়ি নং-১২, রোড নং-৫, ধানমন্ডি, ঢাকা-১২০৫</span>
+                <span>{settings?.address || "বাড়ি নং-১২, রোড নং-৫, ধানমন্ডি, ঢাকা-১২০৫"}</span>
               </li>
               <li className="flex items-center">
                 <Phone className="w-5 h-5 text-amber-400 mr-3 shrink-0" />
-                <span>+৮৮০ ১৭০০-০০০০০০</span>
+                <span>{settings?.phone || "+৮৮০ ১৭০০-০০০০০০"}</span>
               </li>
               <li className="flex items-center">
                 <Mail className="w-5 h-5 text-amber-400 mr-3 shrink-0" />
-                <span>info@bishnupursociety.org</span>
+                <span>{settings?.email || "info@bishnupursociety.org"}</span>
               </li>
             </ul>
           </div>
         </div>
 
         <div className="mt-16 pt-8 border-t border-emerald-900 text-center text-xs text-emerald-400/50 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p>© {new Date().getFullYear()} ঢাকায়স্থ বিষ্ণুপুর ইউনিয়ন সোসাইটি। সর্বস্বত্ব সংরক্ষিত।</p>
+          <p>© {new Date().getFullYear()} ঢাকায়স্থ {settings?.siteName || "বিষ্ণুপুর ইউনিয়ন সোসাইটি"}। সর্বস্বত্ব সংরক্ষিত।</p>
           <Link to="/admin-login" className="hover:text-amber-400 transition-colors opacity-50 hover:opacity-100">এডমিন লগইন</Link>
         </div>
       </div>
