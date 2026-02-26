@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
-import { User, Mail, Phone } from "lucide-react";
+import { User, Mail, Phone, Loader2 } from "lucide-react";
+import { db } from "@/src/lib/firebase";
+import { collection, getDocs, query, orderBy } from "firebase/firestore";
 
 interface CommitteeMember {
-  id: number;
+  id: string;
   name: string;
   designation: string;
-  image_url: string;
+  imageUrl: string;
 }
 
 export default function Committee() {
@@ -14,12 +16,17 @@ export default function Committee() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/committee")
-      .then((res) => res.json())
-      .then((data) => {
-        setMembers(data);
+    const fetchData = async () => {
+      try {
+        const querySnapshot = await getDocs(query(collection(db, "committee"), orderBy("orderIndex", "asc")));
+        setMembers(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as CommitteeMember)));
+      } catch (err) {
+        console.error(err);
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+    fetchData();
   }, []);
 
   return (
@@ -49,7 +56,7 @@ export default function Committee() {
               >
                 <div className="aspect-square overflow-hidden relative">
                   <img
-                    src={member.image_url}
+                    src={member.imageUrl}
                     alt={member.name}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     referrerPolicy="no-referrer"

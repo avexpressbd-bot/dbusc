@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { User, Mail, Lock, Phone, ArrowRight, CheckCircle2, AlertCircle, LogOut, Settings, ShieldCheck } from "lucide-react";
 import { auth, db } from "@/src/lib/firebase";
+import { useNavigate } from "react-router-dom";
 import { 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
@@ -33,6 +34,7 @@ export default function MemberArea() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [userData, setUserData] = useState<any>(null);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -129,6 +131,17 @@ export default function MemberArea() {
                   <LogOut className="w-4 h-4 mr-2" />
                   লগআউট
                 </button>
+                {user.email === "jummanbepari5@gmail.com" && userData?.role !== "admin" && (
+                  <button 
+                    onClick={async () => {
+                      await setDoc(doc(db, "members", user.uid), { ...userData, role: "admin" }, { merge: true });
+                      window.location.reload();
+                    }}
+                    className="w-full mt-4 py-2 bg-amber-100 text-amber-700 text-xs font-bold rounded-xl hover:bg-amber-200 transition-all"
+                  >
+                    Make me Admin (Dev Only)
+                  </button>
+                )}
               </div>
 
               <div className="bg-white rounded-[2.5rem] p-4 shadow-sm border border-emerald-100 overflow-hidden">
@@ -145,6 +158,15 @@ export default function MemberArea() {
                     <Settings className="w-4 h-4 mr-3 text-emerald-400" />
                     সেটিংস
                   </button>
+                  {userData?.role === "admin" && (
+                    <button 
+                      onClick={() => navigate("/admin")}
+                      className="w-full flex items-center px-4 py-3 text-sm font-bold text-amber-600 hover:bg-amber-50 rounded-2xl transition-colors mt-4 border border-amber-200"
+                    >
+                      <ShieldCheck className="w-4 h-4 mr-3 text-amber-500" />
+                      এডমিন প্যানেল
+                    </button>
+                  )}
                 </nav>
               </div>
             </div>

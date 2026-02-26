@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
-import { Calendar, ArrowRight, Bell } from "lucide-react";
+import { Calendar, ArrowRight, Bell, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { db } from "@/src/lib/firebase";
+import { collection, getDocs, query, orderBy } from "firebase/firestore";
 
 interface NewsItem {
-  id: number;
+  id: string;
   title: string;
   content: string;
-  image_url: string;
+  imageUrl: string;
   date: string;
 }
 
@@ -16,12 +18,17 @@ export default function News() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/news")
-      .then((res) => res.json())
-      .then((data) => {
-        setNews(data);
+    const fetchData = async () => {
+      try {
+        const querySnapshot = await getDocs(query(collection(db, "news"), orderBy("date", "desc")));
+        setNews(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as NewsItem)));
+      } catch (err) {
+        console.error(err);
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+    fetchData();
   }, []);
 
   return (
@@ -43,7 +50,7 @@ export default function News() {
 
         {loading ? (
           <div className="flex justify-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-900" />
+            <Loader2 className="animate-spin h-12 w-12 text-emerald-900" />
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -57,7 +64,7 @@ export default function News() {
               >
                 <div className="aspect-video overflow-hidden relative">
                   <img
-                    src={item.image_url}
+                    src={item.imageUrl}
                     alt={item.title}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     referrerPolicy="no-referrer"
