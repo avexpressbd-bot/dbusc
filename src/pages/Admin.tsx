@@ -517,6 +517,40 @@ export default function Admin() {
     }
   };
 
+  const handleMoveCommitteeToAdhoc = async () => {
+    if (!confirm("আপনি কি নিশ্চিতভাবে কার্যনির্বাহী কমিটির সকল সদস্যকে আহ্বায়ক কমিটিতে স্থানান্তর করতে চান?")) return;
+    setLoading(true);
+    try {
+      // 1. Fetch current committee members
+      const committeeSnap = await getDocs(collection(db, "committee"));
+      const members = committeeSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+      if (members.length === 0) {
+        setMessage({ type: "error", text: "কার্যনির্বাহী কমিটিতে কোনো সদস্য নেই।" });
+        return;
+      }
+
+      // 2. Move to adhoc_committee
+      for (const member of members) {
+        const { id, ...data } = member as any;
+        await addDoc(collection(db, "adhoc_committee"), {
+          ...data,
+          phone: (data as any).phone || "" // Ensure phone exists for adhoc
+        });
+        // 3. Delete from committee
+        await deleteDoc(doc(db, "committee", id));
+      }
+
+      setMessage({ type: "success", text: "সফলভাবে সকল সদস্যকে আহ্বায়ক কমিটিতে স্থানান্তর করা হয়েছে!" });
+      fetchData();
+    } catch (err: any) {
+      console.error("Migration error:", err);
+      setMessage({ type: "error", text: "স্থানান্তর করতে সমস্যা হয়েছে।" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleAdminLogout = () => {
     localStorage.removeItem("isAdminAuthenticated");
     navigate("/admin-login");
@@ -663,6 +697,20 @@ export default function Admin() {
                 <div className="text-3xl font-bold text-emerald-900">সক্রিয়</div>
                 <div className="text-sm text-emerald-600 uppercase tracking-widest font-bold mt-1">সাইট স্ট্যাটাস</div>
               </div>
+            </div>
+
+            <div className="bg-amber-50 p-8 rounded-[2.5rem] border border-amber-200 mt-8">
+              <h3 className="text-xl font-bold text-amber-900 mb-4">কমিটি ডাটা মাইগ্রেশন</h3>
+              <p className="text-amber-800 mb-6">
+                আপনি কি কার্যনির্বাহী কমিটির সকল সদস্যকে আহ্বায়ক কমিটিতে স্থানান্তর করতে চান? এটি করলে কার্যনির্বাহী কমিটি ফাঁকা হয়ে যাবে।
+              </p>
+              <button 
+                onClick={handleMoveCommitteeToAdhoc}
+                disabled={loading || committee.length === 0}
+                className="px-8 py-4 bg-amber-600 text-white font-bold rounded-2xl hover:bg-amber-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? "স্থানান্তর হচ্ছে..." : "সকল সদস্যকে আহ্বায়ক কমিটিতে সরান"}
+              </button>
             </div>
           </div>
         )}

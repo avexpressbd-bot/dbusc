@@ -147,6 +147,26 @@ export default function IftarRegistration() {
             <div className="pt-4 border-t border-emerald-50">
               <h3 className="text-lg font-bold text-emerald-900 mb-6">পেমেন্ট তথ্য</h3>
               
+              <div className="bg-amber-50 p-6 rounded-2xl border border-amber-100 mb-8">
+                <h4 className="text-sm font-bold text-amber-900 mb-3 flex items-center">
+                  <AlertCircle className="w-4 h-4 mr-2" />
+                  পেমেন্ট নির্দেশিকা:
+                </h4>
+                <ul className="space-y-2 text-sm text-amber-800">
+                  <li className="flex justify-between">
+                    <span>বিকাশ মার্চেন্ট (পেমেন্ট করুন):</span>
+                    <span className="font-bold">01913986135</span>
+                  </li>
+                  <li className="flex justify-between">
+                    <span>নগদ + বিকাশ (সেন্ড মানি):</span>
+                    <span className="font-bold">01671990635</span>
+                  </li>
+                </ul>
+                <p className="text-[10px] text-amber-600 mt-3 italic">
+                  * পেমেন্ট করার পর ট্রাঞ্জেকশন আইডি (TrxID) অবশ্যই নিচে প্রদান করবেন।
+                </p>
+              </div>
+              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-xs font-bold text-emerald-900 uppercase tracking-widest mb-2 ml-1">পেমেন্ট মাধ্যম</label>
