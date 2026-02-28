@@ -95,10 +95,75 @@ export default function Home() {
           </motion.div>
         </div>
       </section>
+      
+      {/* Mission & Vision - Moved here right below Hero */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-20">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-2xl shadow-emerald-900/10 border border-emerald-50"
+        >
+          <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
+            <div className="text-center md:text-left">
+              <h2 className="text-3xl md:text-4xl font-bold text-emerald-900 mb-4">{settings?.missionTitle || "আমাদের লক্ষ্য ও উদ্দেশ্য"}</h2>
+              <div className="w-24 h-1 bg-amber-400 mx-auto md:mx-0 rounded-full" />
+            </div>
+          </div>
 
-      {/* Iftar Highlight Section */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {missions.length > 0 ? (
+              missions.map((item, idx) => (
+                <motion.div
+                  key={item.id}
+                  whileHover={{ y: -5 }}
+                  className="bg-emerald-50/30 p-8 rounded-3xl border border-emerald-50 text-center group hover:bg-white hover:shadow-xl hover:shadow-emerald-900/5 transition-all duration-300"
+                >
+                  <div className="bg-emerald-900 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 text-amber-400 group-hover:scale-110 transition-transform">
+                    <Target className="w-8 h-8" />
+                  </div>
+                  <h3 className="text-xl font-bold text-emerald-900 mb-4">{item.title}</h3>
+                  <p className="text-emerald-800/70 leading-relaxed">{item.content}</p>
+                </motion.div>
+              ))
+            ) : (
+              // Fallback if no missions in DB
+              [
+                {
+                  icon: <Target className="w-8 h-8 text-amber-500" />,
+                  title: settings?.mission1Title || "সুনির্দিষ্ট লক্ষ্য",
+                  desc: settings?.mission1Desc || "বিষ্ণুপুর ইউনিয়নের মানুষের আর্থ-সামাজিক উন্নয়ন এবং শিক্ষার প্রসারে কাজ করা আমাদের প্রধান লক্ষ্য।",
+                },
+                {
+                  icon: <Users className="w-8 h-8 text-amber-500" />,
+                  title: settings?.mission2Title || "ভ্রাতৃত্বের বন্ধন",
+                  desc: settings?.mission2Desc || "ঢাকায় বসবাসরত বিষ্ণুপুর ইউনিয়নের সকল মানুষের মধ্যে ভ্রাতৃত্ব ও সৌহার্দ্যপূর্ণ সম্পর্ক বজায় রাখা।",
+                },
+                {
+                  icon: <Heart className="w-8 h-8 text-amber-500" />,
+                  title: settings?.mission3Title || "সামাজিক সেবা",
+                  desc: settings?.mission3Desc || "বিপদগ্রস্ত মানুষের পাশে দাঁড়ানো, চিকিৎসা সহায়তা এবং দুস্থদের কল্যাণে বিভিন্ন কর্মসূচি গ্রহণ করা।",
+                },
+              ].map((item, idx) => (
+                <motion.div
+                  key={idx}
+                  whileHover={{ y: -5 }}
+                  className="bg-emerald-50/30 p-8 rounded-3xl border border-emerald-50 text-center group hover:bg-white hover:shadow-xl hover:shadow-emerald-900/5 transition-all duration-300"
+                >
+                  <div className="bg-emerald-900 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 text-amber-400 group-hover:scale-110 transition-transform">
+                    {item.icon}
+                  </div>
+                  <h3 className="text-xl font-bold text-emerald-900 mb-4">{item.title}</h3>
+                  <p className="text-emerald-800/70 leading-relaxed">{item.desc}</p>
+                </motion.div>
+              ))
+            )}
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Iftar Highlight Section - Moved after Mission */}
       {iftarHighlight && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-20">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 relative z-20">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -140,63 +205,6 @@ export default function Home() {
           </motion.div>
         </section>
       )}
-
-      {/* Mission & Vision */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-emerald-900 mb-4">{settings?.missionTitle || "আমাদের লক্ষ্য ও উদ্দেশ্য"}</h2>
-          <div className="w-24 h-1 bg-amber-400 mx-auto rounded-full" />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {missions.length > 0 ? (
-            missions.map((item, idx) => (
-              <motion.div
-                key={item.id}
-                whileHover={{ y: -10 }}
-                className="bg-white p-8 rounded-2xl shadow-sm border border-emerald-100 text-center"
-              >
-                <div className="bg-emerald-50 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <Target className="w-8 h-8 text-amber-500" />
-                </div>
-                <h3 className="text-xl font-bold text-emerald-900 mb-4">{item.title}</h3>
-                <p className="text-emerald-800/70 leading-relaxed">{item.content}</p>
-              </motion.div>
-            ))
-          ) : (
-            // Fallback if no missions in DB
-            [
-              {
-                icon: <Target className="w-8 h-8 text-amber-500" />,
-                title: settings?.mission1Title || "সুনির্দিষ্ট লক্ষ্য",
-                desc: settings?.mission1Desc || "বিষ্ণুপুর ইউনিয়নের মানুষের আর্থ-সামাজিক উন্নয়ন এবং শিক্ষার প্রসারে কাজ করা আমাদের প্রধান লক্ষ্য।",
-              },
-              {
-                icon: <Users className="w-8 h-8 text-amber-500" />,
-                title: settings?.mission2Title || "ভ্রাতৃত্বের বন্ধন",
-                desc: settings?.mission2Desc || "ঢাকায় বসবাসরত বিষ্ণুপুর ইউনিয়নের সকল মানুষের মধ্যে ভ্রাতৃত্ব ও সৌহার্দ্যপূর্ণ সম্পর্ক বজায় রাখা।",
-              },
-              {
-                icon: <Heart className="w-8 h-8 text-amber-500" />,
-                title: settings?.mission3Title || "সামাজিক সেবা",
-                desc: settings?.mission3Desc || "বিপদগ্রস্ত মানুষের পাশে দাঁড়ানো, চিকিৎসা সহায়তা এবং দুস্থদের কল্যাণে বিভিন্ন কর্মসূচি গ্রহণ করা।",
-              },
-            ].map((item, idx) => (
-              <motion.div
-                key={idx}
-                whileHover={{ y: -10 }}
-                className="bg-white p-8 rounded-2xl shadow-sm border border-emerald-100 text-center"
-              >
-                <div className="bg-emerald-50 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  {item.icon}
-                </div>
-                <h3 className="text-xl font-bold text-emerald-900 mb-4">{item.title}</h3>
-                <p className="text-emerald-800/70 leading-relaxed">{item.desc}</p>
-              </motion.div>
-            ))
-          )}
-        </div>
-      </section>
 
       {/* Stats Section */}
       <section className="bg-emerald-900 py-20 text-white">

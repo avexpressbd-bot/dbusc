@@ -12,6 +12,7 @@ import Contact from "./pages/Contact";
 import Admin from "./pages/Admin";
 import AdminLogin from "./pages/AdminLogin";
 import AdhocCommittee from "./pages/AdhocCommittee";
+import ExpatriateCommittee from "./pages/ExpatriateCommittee";
 import IftarRegistration from "./pages/IftarRegistration";
 
 export default function App() {
@@ -22,6 +23,7 @@ export default function App() {
           <Route index element={<Home />} />
           <Route path="committee" element={<Committee />} />
           <Route path="adhoc-committee" element={<AdhocCommittee />} />
+          <Route path="expatriate-committee" element={<ExpatriateCommittee />} />
           <Route path="iftar-registration" element={<IftarRegistration />} />
           <Route path="news" element={<News />} />
           <Route path="member-area" element={<MemberArea />} />

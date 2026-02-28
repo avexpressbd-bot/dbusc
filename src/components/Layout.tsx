@@ -1,11 +1,13 @@
 import { Outlet } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import LiveNewsTicker from "./LiveNewsTicker";
 import { motion, AnimatePresence } from "motion/react";
 
 export default function Layout() {
   return (
     <div className="min-h-screen flex flex-col bg-stone-50 font-sans text-emerald-950">
+      <LiveNewsTicker />
       <Navbar />
       <main className="flex-grow">
         <AnimatePresence mode="wait">
