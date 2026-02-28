@@ -13,14 +13,12 @@ export default function LiveNewsTicker() {
     const fetchLiveNews = async () => {
       try {
         const q = query(
-          collection(db, "live_news")
+          collection(db, "live_news"),
+          where("isActive", "==", true),
+          orderBy("createdAt", "desc")
         );
         const snap = await getDocs(q);
-        const allNews = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
-        const activeNews = allNews
-          .filter((n: any) => n.isActive === true)
-          .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        setNews(activeNews);
+        setNews(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
       } catch (err) {
         console.error("Error fetching live news:", err);
       }
