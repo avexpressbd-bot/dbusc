@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { User, Mail, Lock, Phone, ArrowRight, CheckCircle2, AlertCircle, LogOut, Settings, ShieldCheck, X, Loader2 } from "lucide-react";
-import { auth, db } from "@/src/lib/firebase";
+import { auth, db } from "../lib/firebase";
 import { useNavigate } from "react-router-dom";
 import { 
   createUserWithEmailAndPassword, 

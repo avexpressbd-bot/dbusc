@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { Calendar, ArrowRight, Bell, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { db } from "@/src/lib/firebase";
+import { db } from "../lib/firebase";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
 
 interface NewsItem {

@@ -2,7 +2,7 @@ import { ArrowRight, Target, Users, Heart, Calendar, Loader2 } from "lucide-reac
 import { Link } from "react-router-dom";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
-import { db } from "@/src/lib/firebase";
+import { db } from "../lib/firebase";
 import { doc, getDoc, collection, getDocs, query, orderBy, limit } from "firebase/firestore";
 
 export default function Home() {

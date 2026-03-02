@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Facebook, Twitter, Youtube, Mail, Phone, MapPin } from "lucide-react";
-import { db } from "@/src/lib/firebase";
+import { db } from "../lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 
 export default function Footer() {

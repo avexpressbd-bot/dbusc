@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, User, Download } from "lucide-react";
-import { cn } from "@/src/lib/utils";
-import { db } from "@/src/lib/firebase";
+import { cn } from "../lib/utils";
+import { db } from "../lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 
 const navLinks = [

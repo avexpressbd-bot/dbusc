@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { User, Mail, Phone, Loader2, Globe } from "lucide-react";
-import { db } from "@/src/lib/firebase";
+import { db } from "../lib/firebase";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
 
 interface CommitteeMember {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { MapPin, Phone, Mail, Clock, Send, Facebook, Twitter, Youtube, Loader2 } from "lucide-react";
-import { db } from "@/src/lib/firebase";
+import { db } from "../lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 
 export default function Contact() {
