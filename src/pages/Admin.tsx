@@ -2093,6 +2093,27 @@ export default function Admin() {
                       />
                     </div>
                   </div>
+
+                  <h3 className="text-lg font-bold text-emerald-900 border-b pb-2">ফুটার সেকশন</h3>
+                  <div>
+                    <label className="block text-xs font-bold text-emerald-900 uppercase tracking-widest mb-2">ফুটার টাইটেল</label>
+                    <input 
+                      value={siteSettings.footerTitle || ""} 
+                      onChange={e => setSiteSettings({...siteSettings, footerTitle: e.target.value})}
+                      className="w-full px-6 py-4 bg-emerald-50/50 border border-emerald-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500" 
+                      placeholder="যেমন: ঢাকাস্থ বিষ্ণুপুর ইউনিয়ন সোসাইটি, চাঁদপুর"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-emerald-900 uppercase tracking-widest mb-2">ফুটার ডেসক্রিপশন</label>
+                    <textarea 
+                      value={siteSettings.footerDescription || ""} 
+                      onChange={e => setSiteSettings({...siteSettings, footerDescription: e.target.value})}
+                      rows={4}
+                      className="w-full px-6 py-4 bg-emerald-50/50 border border-emerald-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500" 
+                      placeholder="ফুটারের বর্ণনা লিখুন..."
+                    />
+                  </div>
                 </div>
 
                   <div className="space-y-6">

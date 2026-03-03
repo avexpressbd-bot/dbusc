@@ -28,10 +28,10 @@ export default function Footer() {
           {/* Brand */}
           <div className="col-span-1 md:col-span-1">
             <h3 className="text-xl font-bold text-amber-400 mb-4">
-              {settings?.siteName || "বিষ্ণুপুর ইউনিয়ন সোসাইটি"}
+              {settings?.footerTitle || settings?.siteName || "বিষ্ণুপুর ইউনিয়ন সোসাইটি"}
             </h3>
             <p className="text-sm text-emerald-200/70 leading-relaxed">
-              ঢাকায়স্থ {settings?.siteName || "বিষ্ণুপুর ইউনিয়ন সোসাইটি"} একটি অরাজনৈতিক ও সামাজিক সংগঠন। আমরা আমাদের ইউনিয়নের মানুষের কল্যাণে কাজ করে যাচ্ছি।
+              {settings?.footerDescription || `ঢাকায়স্থ ${settings?.siteName || "বিষ্ণুপুর ইউনিয়ন সোসাইটি"} একটি অরাজনৈতিক ও সামাজিক সংগঠন। আমরা আমাদের ইউনিয়নের মানুষের কল্যাণে কাজ করে যাচ্ছি।`}
             </p>
             <div className="flex space-x-4 mt-6">
               <a href={settings?.facebook || "#"} target="_blank" rel="noreferrer" className="text-emerald-300 hover:text-amber-400 transition-colors">
