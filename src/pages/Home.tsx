@@ -1,4 +1,4 @@
-import { ArrowRight, Target, Users, Heart, Calendar, Loader2 } from "lucide-react";
+import { ArrowRight, Target, Users, Heart, Calendar, Loader2, Megaphone } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
@@ -50,7 +50,7 @@ export default function Home() {
   const otherNews = recentNews.slice(1);
 
   return (
-    <div className="space-y-20 pb-20">
+    <div className="space-y-0 pb-20">
       {/* Hero Section */}
       <section className="relative h-[600px] flex items-center overflow-hidden">
         <div className="absolute inset-0 z-0">

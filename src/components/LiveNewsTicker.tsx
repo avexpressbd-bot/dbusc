@@ -1,23 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import { db } from "../lib/firebase";
-import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
-import { Radio, X } from "lucide-react";
+import { collection, getDocs, query } from "firebase/firestore";
+import { Bell, X } from "lucide-react";
 
 export default function LiveNewsTicker() {
   const [news, setNews] = useState<any[]>([]);
   const [isVisible, setIsVisible] = useState(true);
-  const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
     const fetchLiveNews = async () => {
       try {
-        const q = query(
-          collection(db, "live_news")
-        );
+        const q = query(collection(db, "live_news"));
         const snap = await getDocs(q);
-        const allNews = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
-        const activeNews = allNews
+        const activeNews = snap.docs
+          .map(doc => ({ id: doc.id, ...doc.data() } as any))
           .filter((n: any) => n.isActive === true)
           .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         setNews(activeNews);
@@ -28,44 +25,48 @@ export default function LiveNewsTicker() {
     fetchLiveNews();
   }, []);
 
-  useEffect(() => {
-    if (news.length > 1) {
-      const timer = setInterval(() => {
-        setCurrentIndex((prev) => (prev + 1) % news.length);
-      }, 5000);
-      return () => clearInterval(timer);
-    }
-  }, [news]);
-
   if (!isVisible || news.length === 0) return null;
 
-  const currentNews = news[currentIndex];
+  // Combine all news content into one long string for the marquee
+  const marqueeText = news.map(n => n.content).join("   •   ");
 
   return (
-    <div className={`relative w-full overflow-hidden transition-all duration-500 ${currentNews?.priority === 'high' ? 'bg-red-600' : 'bg-emerald-900'} text-white py-2 px-4 shadow-lg z-[60]`}>
-      <div className="max-w-7xl mx-auto flex items-center gap-4">
-        <div className="flex items-center gap-2 shrink-0 bg-white/20 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">
-          <Radio className={`w-3 h-3 ${currentNews?.priority === 'high' ? 'animate-pulse' : ''}`} />
-          লাইভ নিউজ
-        </div>
-        
-        <div className="flex-grow relative h-6 overflow-hidden">
-          <AnimatePresence mode="wait">
-            <motion.p
-              key={currentNews.id}
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: -20, opacity: 0 }}
-              className="absolute inset-0 text-sm font-medium truncate md:whitespace-normal"
-            >
-              {currentNews.content}
-            </motion.p>
-          </AnimatePresence>
+    <div className="w-full bg-white border-b border-emerald-100 shadow-sm relative z-40">
+      <div className="max-w-7xl mx-auto flex items-center h-10">
+        {/* Highlight Badge */}
+        <div className="flex items-center gap-2 bg-red-600 text-white px-4 h-full shrink-0 font-bold text-xs tracking-wide relative overflow-hidden">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-100 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+          </span>
+          <span className="whitespace-nowrap">ব্রেকিং নিউজ</span>
         </div>
 
+        {/* Marquee Area */}
+        <div className="flex-grow overflow-hidden relative h-full flex items-center bg-emerald-50/30">
+          <motion.div
+            animate={{ x: ["0%", "-50%"] }}
+            transition={{
+              duration: 30,
+              ease: "linear",
+              repeat: Infinity,
+            }}
+            className="flex whitespace-nowrap items-center gap-8 px-4"
+          >
+            <span className="text-emerald-900 font-medium text-sm">
+              {marqueeText}
+            </span>
+            {/* Duplicate for seamless loop */}
+            <span className="text-emerald-900 font-medium text-sm">
+              {marqueeText}
+            </span>
+          </motion.div>
+        </div>
+
+        {/* Close Button */}
         <button 
           onClick={() => setIsVisible(false)}
-          className="shrink-0 p-1 hover:bg-white/20 rounded-full transition-colors"
+          className="px-3 h-full hover:bg-red-50 hover:text-red-500 text-emerald-400 transition-colors border-l border-emerald-100"
         >
           <X className="w-4 h-4" />
         </button>

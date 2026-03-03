@@ -7,8 +7,8 @@ import { motion, AnimatePresence } from "motion/react";
 export default function Layout() {
   return (
     <div className="min-h-screen flex flex-col bg-stone-50 font-sans text-emerald-950">
-      <LiveNewsTicker />
       <Navbar />
+      <LiveNewsTicker />
       <main className="flex-grow">
         <AnimatePresence mode="wait">
           <motion.div
